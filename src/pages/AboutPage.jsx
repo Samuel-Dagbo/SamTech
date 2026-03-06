@@ -50,7 +50,7 @@ export default function AboutPage({ content }) {
                 <img
                   src={image}
                   alt={`${content.profile.name} about visual ${index + 1}`}
-                  className={`w-full object-cover ${
+                  className={`w-full object-contain ${
                     aboutGallery.length === 1
                       ? "h-full min-h-[20rem] sm:min-h-[28rem]"
                       : index === 0 && aboutGallery.length > 2

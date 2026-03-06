@@ -26,7 +26,7 @@ export default function TestimonialsPage({ content }) {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="h-16 w-16 rounded-2xl object-cover border border-black/10"
+                    className="h-16 w-16 rounded-2xl object-contain border border-black/10"
                   />
                 ) : (
                   <div className="grid h-16 w-16 place-items-center rounded-2xl border border-black/10 bg-white text-lg font-bold text-ink">

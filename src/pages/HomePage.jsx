@@ -69,7 +69,7 @@ export default function HomePage({ content }) {
               <img
                 src={content.profile.heroImage}
                 alt={`${content.profile.name} portrait`}
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                className="h-full w-full object-contain"
               />
             </div>
           ) : (
@@ -158,7 +158,7 @@ export default function HomePage({ content }) {
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
-                      className="h-12 w-12 rounded-full object-cover"
+                      className="h-12 w-12 rounded-full object-contain"
                     />
                   )}
                   <div>
@@ -303,7 +303,7 @@ export default function HomePage({ content }) {
                 <img 
                   src={project.image} 
                   alt={project.title} 
-                  className="h-64 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-72" 
+                  className="h-64 w-full object-contain sm:h-72" 
                 />
               </div>
               <div className="p-6">

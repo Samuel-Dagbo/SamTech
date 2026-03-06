@@ -26,7 +26,7 @@ export default function ServicesPage({ content }) {
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-gradient-to-br from-sand via-white to-mist px-6 text-center text-sm font-semibold uppercase tracking-[0.18em] text-black/35">

@@ -15,17 +15,19 @@ export default function WorkPage({ content }) {
           {content.projects.map((project, index) => (
             <article
               key={project._id}
-              className={`grid gap-5 overflow-hidden rounded-[32px] border border-black/10 bg-white/80 p-4 shadow-panel backdrop-blur lg:grid-cols-[minmax(320px,0.9fr)_1fr] ${
-                index % 2 === 1 ? "lg:grid-cols-[1fr_minmax(320px,0.9fr)]" : ""
+              className={`grid gap-5 overflow-hidden rounded-[32px] border border-black/10 bg-white/80 p-4 shadow-panel backdrop-blur lg:grid-cols-[1fr_1fr] ${
+                index % 2 === 1 ? "lg:grid-reverse" : ""
               }`}
             >
-              <img
-                src={project.image}
-                alt={project.title}
-                className={`h-72 w-full rounded-[28px] object-cover lg:h-full lg:min-h-[22rem] ${
-                  index % 2 === 1 ? "lg:order-2" : ""
-                }`}
-              />
+              <div className="relative overflow-hidden rounded-[28px] bg-black/5">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className={`h-72 w-full object-contain lg:h-full lg:min-h-[22rem] ${
+                    index % 2 === 1 ? "lg:order-2" : ""
+                  }`}
+                />
+              </div>
               <div
                 className={`flex flex-col justify-between rounded-[28px] bg-gradient-to-br from-white to-[#f5ede1] p-6 ${
                   index % 2 === 1 ? "lg:order-1" : ""

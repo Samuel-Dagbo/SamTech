@@ -5,10 +5,17 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-atmosphere font-sans text-ink antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  * {
+    @apply max-w-full;
   }
 
   h1,
