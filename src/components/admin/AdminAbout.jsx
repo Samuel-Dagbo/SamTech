@@ -144,7 +144,7 @@ export default function AdminAbout() {
 
     const nextProfile = {
       ...profile,
-      aboutGallery: [...(profile.aboutGallery || []), value]
+      aboutGallery: [...(profile.aboutGallery || []), aboutGalleryUrl]
     };
     nextProfile.aboutImage = nextProfile.aboutGallery[0] || profile.aboutImage || "";
 
