@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://samtech-server-unvk.onrender.com/api";
 
 export default function AdminPortal() {
   const { slug: secretSlug } = useParams();
@@ -12,6 +12,7 @@ export default function AdminPortal() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState("");
 
   // If already logged in, redirect to admin dashboard
   if (existingToken) {
@@ -27,6 +28,7 @@ export default function AdminPortal() {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    setDebugInfo(`Connecting to: ${API_BASE}/portal/${secretSlug}/session`);
 
     try {
       const response = await fetch(`${API_BASE}/portal/${secretSlug}/session`, {
@@ -34,18 +36,29 @@ export default function AdminPortal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials)
       });
-      const payload = await response.json();
-
+      
+      setDebugInfo(prev => prev + ` | Status: ${response.status}`);
+      
       if (!response.ok) {
+        const payload = await response.json();
+        setDebugInfo(prev => prev + ` | Error: ${payload.message}`);
         throw new Error(payload.message || "Access denied");
       }
 
+      const payload = await response.json();
       localStorage.setItem("samtech_admin_token", payload.token);
       setMessage("Access granted.");
-      // Redirect to admin dashboard after successful login
       navigate("/admin/overview");
     } catch (error) {
-      setMessage(error.message);
+      // Differentiate between network errors and other errors
+      if (!navigator.onLine) {
+        setMessage("You are offline. Please check your internet connection.");
+      } else if (error.name === "TypeError" && error.message.includes("fetch")) {
+        setMessage("Cannot connect to server. Please check if the backend is running.");
+        setDebugInfo(prev => prev + ` | Network Error: ${error.message}`);
+      } else {
+        setMessage(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -100,6 +113,7 @@ export default function AdminPortal() {
           </form>
 
           {message ? <p className="mt-4 text-sm text-black/60">{message}</p> : null}
+          {debugInfo ? <p className="mt-2 text-xs text-red-400 font-mono">{debugInfo}</p> : null}
         </div>
       </div>
     </main>
