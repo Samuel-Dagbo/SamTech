@@ -142,11 +142,13 @@ export default function AdminAbout() {
     const value = aboutGalleryUrl.trim();
     if (!value) return;
 
+    const updatedGallery = [...(profile.aboutGallery || []), value];
+    
     const nextProfile = {
       ...profile,
-      aboutGallery: [...(profile.aboutGallery || []), aboutGalleryUrl]
+      aboutGallery: updatedGallery,
+      aboutImage: updatedGallery[0] || profile.aboutImage || ""
     };
-    nextProfile.aboutImage = nextProfile.aboutGallery[0] || profile.aboutImage || "";
 
     setBusy(true);
     authFetch(`${API_BASE}/content/profile`, {
