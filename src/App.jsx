@@ -14,17 +14,19 @@ import AdminServices from "./components/admin/AdminServices.jsx";
 import AdminProjects from "./components/admin/AdminProjects.jsx";
 import AdminTestimonials from "./components/admin/AdminTestimonials.jsx";
 import AdminMessages from "./components/admin/AdminMessages.jsx";
+import BackToTop from "./components/BackToTop.jsx";
 import { fallbackContent } from "./data/fallbackContent.js";
 import SiteLayout from "./layout/SiteLayout.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ProjectDetailPage from "./pages/ProjectDetailPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
 import TestimonialsPage from "./pages/TestimonialsPage.jsx";
 import WorkPage from "./pages/WorkPage.jsx";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://samtech-server-unvk.onrender.com/api";
 
 export default function App() {
   const [content, setContent] = useState(fallbackContent);
@@ -90,9 +92,10 @@ export default function App() {
             <Route path="/testimonials" element={<TestimonialsPage content={content} />} />
             <Route path="/services" element={<ServicesPage content={content} />} />
             <Route path="/contact" element={<ContactPage content={content} />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <BackToTop />
       </BrowserRouter>
     </ToastProvider>
   );

@@ -11,7 +11,7 @@ const navItems = [
 ];
 
 const linkBase =
-  "rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-white/70 hover:text-ink";
+  "rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 hover:bg-white/70 hover:text-ink hover:shadow-md active:scale-95";
 
 export default function SiteLayout({ content }) {
   const navigate = useNavigate();
@@ -45,7 +45,8 @@ export default function SiteLayout({ content }) {
     ["GitHub", profile.githubUrl],
     ["LinkedIn", profile.linkedinUrl],
     ["X", profile.xUrl],
-    ["Email", profile.email ? `mailto:${profile.email}` : ""]
+    ["Email", profile.email ? `mailto:${profile
+      .email}` : ""]
   ].filter(([, href]) => href);
 
   return (
@@ -97,7 +98,7 @@ export default function SiteLayout({ content }) {
 
           <NavLink
             to="/contact"
-            className={`${mobileOpen ? "col-span-2 flex" : "hidden"} items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-black xl:flex`}
+            className={`${mobileOpen ? "col-span-2 flex" : "hidden"} items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-black hover:scale-105 xl:flex`}
             onClick={() => setMobileOpen(false)}
           >
             Hire me
@@ -121,7 +122,7 @@ export default function SiteLayout({ content }) {
           <div className="flex flex-col gap-3">
             <NavLink
               to="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-black"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-semibold text-white transition-all duration-300 hover:bg-black hover:scale-105"
             >
               Start a conversation
             </NavLink>
@@ -130,7 +131,7 @@ export default function SiteLayout({ content }) {
                 href={profile.resumeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-black/10 bg-white px-6 text-sm font-semibold text-ink transition hover:bg-black hover:text-white"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-black/10 bg-white px-6 text-sm font-semibold text-ink transition-all duration-300 hover:bg-black hover:text-white hover:scale-105"
               >
                 Download CV
               </a>

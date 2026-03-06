@@ -18,6 +18,23 @@
   strong {
     @apply font-display;
   }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-sand/30;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-forest/40 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-forest/60;
+  }
 }
 
 @layer utilities {
@@ -32,6 +49,20 @@
   
   .animate-fade-in-down {
     animation: fadeInDown 0.6s ease-out forwards;
+  }
+  
+  /* Slide animations */
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 0.5s ease-out forwards;
+  }
+  
+  /* Scale animations */
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
   }
   
   /* Staggered animation delays */
@@ -55,9 +86,21 @@
     animation-delay: 500ms;
   }
   
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  
+  .animation-delay-700 {
+    animation-delay: 700ms;
+  }
+  
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
+  
   /* Transition utilities */
   .transition-transform-hover {
-    @apply transition-transform duration-300 ease-out;
+    @apply transition-all duration-300 ease-out;
   }
   
   .transition-transform-hover:hover {
@@ -70,12 +113,54 @@
   }
   
   .hover-scale:hover {
-    @apply scale-[1.02];
+    @apply scale-[1.02] shadow-lg;
+  }
+  
+  /* Card hover lift effect */
+  .card-hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-hover-lift:hover {
+    @apply -translate-y-2 shadow-[0_35px_60px_-15px_rgba(33,54,49,0.25)];
+  }
+  
+  /* Button hover effects */
+  .btn-hover-scale {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .btn-hover-scale:hover {
+    @apply scale-105;
+  }
+  
+  /* Link hover underline */
+  .link-hover-underline {
+    @apply relative;
+  }
+  
+  .link-hover-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300;
+  }
+  
+  .link-hover-underline:hover::after {
+    @apply w-full;
   }
   
   /* Focus ring */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2;
+  }
+  
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-black/10;
+  }
+  
+  /* Number counter animation */
+  .count-up {
+    @apply inline-block;
   }
 }
 
@@ -107,5 +192,38 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
