@@ -236,7 +236,10 @@ export default function AdminAbout() {
           type="text" 
           placeholder="About image URL" 
           value={profile.aboutImage || ""} 
-          onChange={(e) => setProfile((c) => ({ ...c, aboutImage: e.target.value }))} 
+          onChange={(e) => {
+            setProfile((c) => ({ ...c, aboutImage: e.target.value }));
+            setStatus("Image URL updated. Click 'Save about page' to save changes.");
+          }} 
         />
         <UploadPanel
           label="About page image"
