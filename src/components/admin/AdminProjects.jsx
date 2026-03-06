@@ -24,6 +24,9 @@ const emptyProject = {
   summary: "",
   stack: "",
   image: "",
+  liveUrl: "",
+  repoUrl: "",
+  featured: false,
   order: 0
 };
 
@@ -112,6 +115,9 @@ export default function AdminProjects() {
       summary: project.summary || "",
       stack: (project.stack || []).join(", "),
       image: project.image || "",
+      liveUrl: project.liveUrl || "",
+      repoUrl: project.repoUrl || "",
+      featured: project.featured || false,
       order: project.order || 0
     });
   };
@@ -200,6 +206,29 @@ export default function AdminProjects() {
             value={projectForm.image} 
             onChange={(e) => setProjectForm((c) => ({ ...c, image: e.target.value }))} 
           />
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field 
+              placeholder="Live URL (e.g., https://myproject.com)" 
+              value={projectForm.liveUrl} 
+              onChange={(e) => setProjectForm((c) => ({ ...c, liveUrl: e.target.value }))} 
+            />
+            <Field 
+              placeholder="Repository URL (e.g., https://github.com/user/repo)" 
+              value={projectForm.repoUrl} 
+              onChange={(e) => setProjectForm((c) => ({ ...c, repoUrl: e.target.value }))} 
+            />
+          </div>
+          
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={projectForm.featured}
+              onChange={(e) => setProjectForm((c) => ({ ...c, featured: e.target.checked }))}
+              className="h-5 w-5 rounded border-black/20 text-forest focus:ring-forest"
+            />
+            <span className="text-sm font-medium text-ink">Featured project (shows on homepage)</span>
+          </label>
           
           <Field 
             type="number" 
