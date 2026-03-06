@@ -61,7 +61,7 @@ export default function ProjectDetailPage({ content }) {
           </article>
 
           <div className="overflow-hidden rounded-[32px] border border-black/10 bg-white shadow-panel">
-            <img src={project.image} alt={project.title} className="h-full min-h-[20rem] w-full object-contain" />
+            <img src={project.image} alt={project.title} className="h-auto w-full" />
           </div>
         </div>
 
@@ -109,7 +109,7 @@ export default function ProjectDetailPage({ content }) {
                     src={image}
                     alt={`${project.title} screenshot ${index + 1}`}
                     loading="lazy"
-                    className="h-72 w-full object-contain sm:h-80"
+                    className="h-auto w-full"
                   />
                 </div>
               ))}

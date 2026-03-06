@@ -155,7 +155,7 @@ Message: ${contact.message || "I would like to discuss a project."}`;
               <img
                 src={profile.contactImage}
                 alt="Contact visual"
-                className="h-full min-h-[18rem] w-full object-contain"
+                className="h-auto w-full"
               />
             </div>
           ) : null}

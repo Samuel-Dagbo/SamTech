@@ -21,12 +21,12 @@ export default function ServicesPage({ content }) {
               key={service._id || service.title}
               className="overflow-hidden rounded-[28px] border border-black/10 bg-white/75 shadow-panel backdrop-blur"
             >
-              <div className="relative h-52 overflow-hidden bg-sand">
+              <div className="relative overflow-hidden bg-sand">
                 {service.image ? (
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="h-full w-full object-contain"
+                    className="h-auto w-full"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-gradient-to-br from-sand via-white to-mist px-6 text-center text-sm font-semibold uppercase tracking-[0.18em] text-black/35">

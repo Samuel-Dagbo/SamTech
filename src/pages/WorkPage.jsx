@@ -23,7 +23,7 @@ export default function WorkPage({ content }) {
                 <img
                   src={project.image}
                   alt={project.title}
-                  className={`h-72 w-full object-contain lg:h-full lg:min-h-[22rem] ${
+                  className={`h-auto w-full ${
                     index % 2 === 1 ? "lg:order-2" : ""
                   }`}
                 />

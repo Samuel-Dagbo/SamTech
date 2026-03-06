@@ -65,11 +65,11 @@ export default function HomePage({ content }) {
 
         <div className="grid gap-5">
           {content.profile.heroImage ? (
-            <div className="relative min-h-[26rem] overflow-hidden rounded-[32px] border border-black/10 bg-forest shadow-panel sm:min-h-[34rem] animate-fade-in animation-delay-200">
+            <div className="relative overflow-hidden rounded-[32px] border border-black/10 bg-forest shadow-panel animate-fade-in animation-delay-200">
               <img
                 src={content.profile.heroImage}
                 alt={`${content.profile.name} portrait`}
-                className="h-full w-full object-contain"
+                className="h-auto w-full"
               />
             </div>
           ) : (
@@ -158,7 +158,7 @@ export default function HomePage({ content }) {
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
-                      className="h-12 w-12 rounded-full object-contain"
+                      className="h-auto w-12 rounded-full"
                     />
                   )}
                   <div>
@@ -303,7 +303,7 @@ export default function HomePage({ content }) {
                 <img 
                   src={project.image} 
                   alt={project.title} 
-                  className="h-64 w-full object-contain sm:h-72" 
+                  className="h-auto w-full" 
                 />
               </div>
               <div className="p-6">
