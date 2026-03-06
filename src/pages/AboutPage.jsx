@@ -4,14 +4,32 @@ const cardClass =
   "rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-panel backdrop-blur";
 
 export default function AboutPage({ content }) {
-  const aboutGallery =
-    content.profile.aboutGallery?.length
-      ? content.profile.aboutGallery
-      : content.profile.aboutImage
-        ? [content.profile.aboutImage]
-        : [
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80"
-          ];
+  // Combine aboutImage and aboutGallery: include aboutImage at the start if it exists and is different from gallery images
+  const aboutGallery = (() => {
+    const gallery = content.profile.aboutGallery || [];
+    const image = content.profile.aboutImage;
+    
+    // If both exist and aboutImage is not already in gallery, include it at the start
+    if (image && gallery.length > 0) {
+      const imageNotInGallery = !gallery.some(img => img === image || img.includes(image.slice(0, 50)));
+      return imageNotInGallery ? [image, ...gallery] : gallery;
+    }
+    
+    // If only gallery exists, use gallery
+    if (gallery.length > 0) {
+      return gallery;
+    }
+    
+    // If only aboutImage exists, use it
+    if (image) {
+      return [image];
+    }
+    
+    // Fallback to default image
+    return [
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80"
+    ];
+  })();
 
   return (
     <main className="px-3 py-8 sm:px-6">
