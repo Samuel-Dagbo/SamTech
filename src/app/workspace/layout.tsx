@@ -44,6 +44,18 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
             >
               Dashboard
             </Link>
+            <Link
+              href="/workspace/tasks"
+              className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              Tasks
+            </Link>
+            <Link
+              href="/workspace/announcements"
+              className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              Announcements
+            </Link>
             {canUser(auth.user, "team.manage") ? (
               <Link
                 href="/workspace/team"
