@@ -37,6 +37,8 @@ export async function POST(request: Request) {
       name: parsed.data.name,
       title: parsed.data.title || undefined,
       role: parsed.data.role,
+      department: parsed.data.department,
+      scopes: parsed.data.scopes,
       welcomeMessage: parsed.data.welcomeMessage || undefined,
       actor: {
         id: guard.auth.user.id,

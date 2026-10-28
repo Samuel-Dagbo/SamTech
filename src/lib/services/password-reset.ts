@@ -6,6 +6,7 @@ import { sendEmail } from "@/lib/mail/mailjet";
 import { passwordResetEmail } from "@/lib/mail/templates";
 import { generateToken, RESET_TTL_MINUTES } from "@/lib/auth/tokens";
 import { hashToken, revokeAllUserSessions, type SessionUser } from "@/lib/auth/session";
+import { normalizeScopes } from "@/lib/auth/rbac";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import PasswordReset from "@/models/password-reset";
 import User from "@/models/user";
@@ -97,7 +98,14 @@ export async function confirmPasswordReset(input: {
   return {
     ok: true,
     message: "Password updated. Please sign in with your new password.",
-    user: { id: String(user._id), name: user.name, email: user.email, role: user.role, title: user.title },
+    user: {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      title: user.title,
+      scopes: normalizeScopes(user.scopes),
+    },
   };
 }
 

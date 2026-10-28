@@ -9,7 +9,7 @@ import { INVITE_TTL_HOURS, generateToken, invitationExpiry } from "@/lib/auth/to
 import { hashToken } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession, type SessionUser } from "@/lib/auth/session";
-import { ROLE_LABELS, type Role } from "@/lib/auth/rbac";
+import { DEPARTMENT_LABELS, ROLE_LABELS, normalizeScopes, type Department, type Role } from "@/lib/auth/rbac";
 import Invitation, { type InvitationDoc } from "@/models/invitation";
 import User from "@/models/user";
 
@@ -24,11 +24,19 @@ function inviteLink(token: string): string {
   return `${getPublicAppUrl()}/invite/accept?token=${encodeURIComponent(token)}`;
 }
 
+function roleLabelFor(invitation: InvitationDoc): string {
+  const parts = [
+    ROLE_LABELS[invitation.role as Role] ?? invitation.role,
+    invitation.department ? DEPARTMENT_LABELS[invitation.department as Department] : undefined,
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
 async function deliverInvitationEmail(invitation: InvitationDoc, token: string): Promise<EmailOutcome> {
   const template = invitationEmail({
     name: invitation.name,
     title: invitation.title,
-    roleLabel: ROLE_LABELS[invitation.role as Role] ?? invitation.role,
+    roleLabel: roleLabelFor(invitation),
     welcomeMessage: invitation.welcomeMessage,
     acceptUrl: inviteLink(token),
     expiresAt: invitation.expiresAt,
@@ -51,6 +59,8 @@ export async function createInvitation(input: {
   name: string;
   title?: string;
   role: Role;
+  department?: Department;
+  scopes?: string[];
   welcomeMessage?: string;
   actor: { id?: string; email?: string } & Partial<AuditEntry>;
   /** Bootstrap path re-uses this service without an HTTP context. */
@@ -76,6 +86,8 @@ export async function createInvitation(input: {
     name: input.name.trim(),
     title: input.title?.trim() || undefined,
     role: input.role,
+    department: input.department || undefined,
+    scopes: normalizeScopes(input.scopes),
     status: "pending",
     tokenHash,
     invitedBy: input.actor.id,
@@ -94,7 +106,7 @@ export async function createInvitation(input: {
     action: "team.invited",
     targetType: "invitation",
     targetId: String(invitation._id),
-    metadata: { inviteeEmail: email, role: input.role, emailSent: outcome.sent },
+    metadata: { inviteeEmail: email, role: input.role, department: input.department ?? null, scopes: normalizeScopes(input.scopes), emailSent: outcome.sent },
     ip: input.actor.ip,
     userAgent: input.actor.userAgent,
   });
@@ -115,6 +127,8 @@ export type InvitationView = {
   name: string;
   title?: string;
   role: Role;
+  department?: Department;
+  scopes: string[];
   status: InvitationDoc["status"];
   expired: boolean;
   emailSent: boolean;
@@ -134,6 +148,8 @@ export async function listInvitations(): Promise<InvitationView[]> {
     name: doc.name,
     title: doc.title,
     role: doc.role as Role,
+    department: doc.department as Department | undefined,
+    scopes: normalizeScopes(doc.scopes),
     status: doc.status,
     expired: doc.status === "pending" && doc.expiresAt.getTime() < now,
     emailSent: Boolean(doc.emailSentAt),
@@ -231,7 +247,7 @@ export async function checkInvitationToken(token: string): Promise<InvitationChe
     invitation: {
       name: invitation.name,
       title: invitation.title,
-      roleLabel: ROLE_LABELS[invitation.role as Role] ?? invitation.role,
+      roleLabel: roleLabelFor(invitation),
       expiresAt: invitation.expiresAt,
     },
   };
@@ -277,6 +293,8 @@ export async function acceptInvitation(input: {
             passwordHash,
             role: invitation.role,
             title: invitation.title,
+            department: invitation.department || undefined,
+            scopes: normalizeScopes(invitation.scopes),
             status: "active",
           },
         ],
@@ -316,6 +334,8 @@ export async function acceptInvitation(input: {
       email,
       role: invitation.role as Role,
       title: invitation.title,
+      department: (invitation.department as Department) || undefined,
+      scopes: normalizeScopes(invitation.scopes),
     },
   };
 }

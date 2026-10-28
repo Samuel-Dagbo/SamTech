@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     await ContactMessage.create({
       name: data.name,
       email: data.email,
+      subject: data.subject,
       phone: data.phone || undefined,
       message: data.message,
       source: "website",
@@ -60,9 +61,9 @@ export async function POST(request: Request) {
   if (isMailjetConfigured() && notifyEmail) {
     const result = await sendEmail({
       to: notifyEmail,
-      subject: `New contact message from ${data.name}`,
-      text: `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone || "—"}\n\n${data.message}`,
-      html: `<p><strong>Name:</strong> ${data.name}</p><p><strong>Email:</strong> ${data.email}</p><p><strong>Phone:</strong> ${data.phone || "—"}</p><hr><p>${data.message.replace(/\n/g, "<br>")}</p>`,
+      subject: data.subject ? `New contact message: ${data.subject}` : `New contact message from ${data.name}`,
+      text: `Name: ${data.name}\nEmail: ${data.email}\nSubject: ${data.subject || "—"}\nPhone: ${data.phone || "—"}\n\n${data.message}`,
+      html: `<p><strong>Name:</strong> ${data.name}</p><p><strong>Email:</strong> ${data.email}</p><p><strong>Subject:</strong> ${data.subject || "—"}</p><p><strong>Phone:</strong> ${data.phone || "—"}</p><hr><p>${data.message.replace(/\n/g, "<br>")}</p>`,
     });
     if (!result.sent) {
       console.warn(`[contact] Notification email not sent: ${result.error}`);

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/workspace/logout-button";
 import { getAuthContext } from "@/lib/auth/session";
-import { ROLE_LABELS, can } from "@/lib/auth/rbac";
+import { ROLE_LABELS, canUser } from "@/lib/auth/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +44,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
             >
               Dashboard
             </Link>
-            {can(auth.user.role, "team.manage") ? (
+            {canUser(auth.user, "team.manage") ? (
               <Link
                 href="/workspace/team"
                 className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
@@ -56,7 +56,10 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <span className="block text-sm font-semibold">{auth.user.name}</span>
-              <span className="block text-xs text-white/50">{ROLE_LABELS[auth.user.role]}</span>
+              <span className="block text-xs text-white/50">
+                {ROLE_LABELS[auth.user.role]}
+                {auth.user.department ? ` · ${auth.user.department}` : ""}
+              </span>
             </div>
             <LogoutButton />
           </div>

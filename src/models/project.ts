@@ -21,6 +21,7 @@ export interface ProjectDoc {
   liveUrl?: string;
   repoUrl?: string;
   featured?: boolean;
+  published?: boolean;
   order?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -56,6 +57,7 @@ const projectSchema = new Schema<ProjectDoc, ProjectModel>(
     liveUrl: { type: String, default: "" },
     repoUrl: { type: String, default: "" },
     featured: { type: Boolean, default: false },
+    published: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
   },
   { timestamps: true },

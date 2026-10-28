@@ -30,11 +30,11 @@ export const getPublicContent = cache(async (): Promise<SiteContent> => {
     await connectDB();
     const [profile, projects, services, testimonials] = await Promise.all([
       Profile.findOne().sort({ createdAt: -1 }).lean(),
-      Project.find({ slug: { $ne: "" }, title: { $ne: "" } })
+      Project.find({ slug: { $ne: "" }, title: { $ne: "" }, published: { $ne: false } })
         .sort({ order: 1, featured: -1, createdAt: -1 })
         .lean(),
-      Service.find().sort({ order: 1, createdAt: -1 }).lean(),
-      Testimonial.find().sort({ order: 1, createdAt: -1 }).lean(),
+      Service.find({ published: { $ne: false } }).sort({ order: 1, createdAt: -1 }).lean(),
+      Testimonial.find({ published: { $ne: false } }).sort({ order: 1, createdAt: -1 }).lean(),
     ]);
 
     return {
@@ -55,7 +55,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectData | null
   const fallbackMatch = fallbackContent.projects.find((project) => project.slug === slug) ?? null;
   try {
     await connectDB();
-    const project = await Project.findOne({ slug }).lean();
+    const project = await Project.findOne({ slug, published: { $ne: false } }).lean();
     return project ? plain<ProjectData>(project) : fallbackMatch;
   } catch (error) {
     logContentFailure(error);

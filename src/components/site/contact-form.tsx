@@ -7,9 +7,9 @@ import { useToast } from "@/components/ui/toast";
 import { whatsappLink } from "@/lib/site";
 import type { ProfileData } from "@/lib/types";
 
-type FormState = { name: string; email: string; phone: string; message: string; website: string };
+type FormState = { name: string; email: string; subject: string; phone: string; message: string; website: string };
 
-const initialState: FormState = { name: "", email: "", phone: "", message: "", website: "" };
+const initialState: FormState = { name: "", email: "", subject: "", phone: "", message: "", website: "" };
 
 export function ContactForm({ profile }: { profile: ProfileData }) {
   const { toast } = useToast();
@@ -24,6 +24,8 @@ export function ContactForm({ profile }: { profile: ProfileData }) {
   const emailBody = `Hello SamTech,\n\n${form.message}\n\n— ${form.name || "Client"}\nEmail: ${form.email || "not provided"}${
     form.phone ? `\nPhone: ${form.phone}` : ""
   }`;
+
+  const mailtoSubject = form.subject || "Project inquiry";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -89,6 +91,20 @@ export function ContactForm({ profile }: { profile: ProfileData }) {
       </div>
 
       <div className="grid gap-1.5">
+        <Label htmlFor="contact-subject">Subject</Label>
+        <Input
+          id="contact-subject"
+          name="subject"
+          type="text"
+          placeholder="e.g. E-commerce build for a fashion brand"
+          required
+          value={form.subject}
+          onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
+        />
+        <FieldError message={errors.subject} />
+      </div>
+
+      <div className="grid gap-1.5">
         <Label htmlFor="contact-phone">Phone (optional)</Label>
         <Input
           id="contact-phone"
@@ -145,7 +161,7 @@ export function ContactForm({ profile }: { profile: ProfileData }) {
         </a>
         <a
           href={`mailto:${profile.email || "samueldagbo50@gmail.com"}?subject=${encodeURIComponent(
-            "Project inquiry",
+            mailtoSubject,
           )}&body=${encodeURIComponent(emailBody)}`}
           className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-black/10 bg-white px-5 text-sm font-semibold text-ink transition hover:bg-black hover:text-white"
         >

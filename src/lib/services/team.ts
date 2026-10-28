@@ -2,8 +2,8 @@ import "server-only";
 import { connectDB } from "@/lib/db";
 import { recordAudit } from "@/lib/audit";
 import { revokeAllUserSessions, type SessionUser } from "@/lib/auth/session";
+import { normalizeScopes, normalizeDepartment, type Department, type Role } from "@/lib/auth/rbac";
 import User from "@/models/user";
-import type { Role } from "@/lib/auth/rbac";
 
 export type TeamMemberView = {
   id: string;
@@ -12,6 +12,8 @@ export type TeamMemberView = {
   role: Role;
   title?: string;
   status: "active" | "suspended";
+  department?: Department;
+  scopes: string[];
   lastLoginAt?: Date;
   createdAt?: Date;
 };
@@ -25,6 +27,8 @@ export async function listTeamMembers(): Promise<TeamMemberView[]> {
     role: string;
     title?: string;
     status: string;
+    department?: Department;
+    scopes?: string[];
     lastLoginAt?: Date;
     createdAt?: Date;
   }[]>();
@@ -35,6 +39,8 @@ export async function listTeamMembers(): Promise<TeamMemberView[]> {
     role: doc.role as Role,
     title: doc.title,
     status: doc.status as "active" | "suspended",
+    department: doc.department,
+    scopes: normalizeScopes(doc.scopes),
     lastLoginAt: doc.lastLoginAt,
     createdAt: doc.createdAt,
   }));
@@ -143,6 +149,73 @@ export async function changeRole(
     userAgent: ctx.userAgent,
   });
   return { ok: true, message: `${user.name} is now ${newRole === "founder" ? "a founder" : "a team member"}.` };
+}
+
+export async function setMemberDepartment(
+  userId: string,
+  rawDepartment: string | undefined,
+  ctx: TeamActionContext,
+): Promise<TeamActionResult> {
+  await connectDB();
+  const user = await User.findById(userId);
+  if (!user) return { ok: false, message: "Team member not found." };
+  if (user.role === "founder") {
+    return { ok: false, message: "Founders do not belong to a department." };
+  }
+
+  const department: Department | undefined = rawDepartment
+    ? normalizeDepartment(rawDepartment)
+    : undefined;
+  if (rawDepartment && !department) {
+    return { ok: false, message: "Unknown department." };
+  }
+
+  const previous = user.department;
+  user.department = department;
+  await user.save();
+
+  await recordAudit({
+    actorId: ctx.actor.id,
+    actorEmail: ctx.actor.email,
+    action: "team.department_changed",
+    targetType: "user",
+    targetId: userId,
+    metadata: { targetEmail: user.email, from: previous ?? null, to: department ?? null },
+    ip: ctx.ip,
+    userAgent: ctx.userAgent,
+  });
+  return { ok: true, message: department ? `${user.name} moved to their department.` : `${user.name}'s department cleared.` };
+}
+
+export async function setMemberScopes(
+  userId: string,
+  rawScopes: string[] | undefined,
+  ctx: TeamActionContext,
+): Promise<TeamActionResult> {
+  await connectDB();
+  const user = await User.findById(userId);
+  if (!user) return { ok: false, message: "Team member not found." };
+  if (user.role === "founder") {
+    return { ok: false, message: "Founders already hold full access." };
+  }
+
+  const scopes = normalizeScopes(rawScopes);
+  user.scopes = scopes;
+  await user.save();
+  // Access changes take effect on the next request; no session suppression
+  // needed because scopes are resolved from the database on every lookup.
+
+  await recordAudit({
+    actorId: ctx.actor.id,
+    actorEmail: ctx.actor.email,
+    action: "team.scopes_changed",
+    targetType: "user",
+    targetId: userId,
+    metadata: { targetEmail: user.email, scopes },
+    ip: ctx.ip,
+    userAgent: ctx.userAgent,
+  });
+  return { ok: true, message: scopes.length ? `${user.name}'s access updated (${scopes.length} scope${scopes.length === 1 ? "" : "s"}).` : `${user.name}'s scopes cleared.` };
 }
 
 export async function sendMemberPasswordReset(

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAuthContext } from "@/lib/auth/session";
-import { can } from "@/lib/auth/rbac";
+import { canUser } from "@/lib/auth/rbac";
 import { listInvitations } from "@/lib/services/invitations";
 import { listTeamMembers } from "@/lib/services/team";
 import { TeamManager, type Invitation, type TeamMember } from "@/components/workspace/team-manager";
@@ -22,7 +22,7 @@ export default async function TeamPage() {
   if (!auth) {
     redirect("/login?next=/workspace/team");
   }
-  if (!can(auth.user.role, "team.manage")) {
+  if (!canUser(auth.user, "team.manage")) {
     // Team members see the dashboard instead of team administration.
     redirect("/workspace");
   }
@@ -36,6 +36,8 @@ export default async function TeamPage() {
     role: member.role,
     title: member.title,
     status: member.status,
+    department: member.department,
+    scopes: member.scopes,
     lastLoginAt: iso(member.lastLoginAt),
     createdAt: iso(member.createdAt),
   }));
@@ -46,6 +48,8 @@ export default async function TeamPage() {
     name: invitation.name,
     title: invitation.title,
     role: invitation.role,
+    department: invitation.department,
+    scopes: invitation.scopes,
     status: invitation.status,
     expired: invitation.expired,
     emailSent: invitation.emailSent,

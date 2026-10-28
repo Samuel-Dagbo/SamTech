@@ -5,6 +5,7 @@ export interface TestimonialDoc {
   company: string;
   quote: string;
   image?: string;
+  published?: boolean;
   order?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -18,6 +19,7 @@ const testimonialSchema = new Schema<TestimonialDoc, TestimonialModel>(
     company: { type: String, default: "" },
     quote: { type: String, default: "" },
     image: { type: String, default: "" },
+    published: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
   },
   { timestamps: true },

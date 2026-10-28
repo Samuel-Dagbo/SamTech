@@ -1,7 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { getAuthContext, type AuthContext } from "./session";
-import { can, type Permission } from "./rbac";
+import { canUser, type Permission } from "./rbac";
 
 /**
  * Server-side authorization guards for Route Handlers and Server Components.
@@ -32,7 +32,7 @@ export async function requirePermission(permission: Permission): Promise<AuthGua
       response: NextResponse.json({ message: "Authentication required." }, { status: 401 }),
     };
   }
-  if (!can(auth.user.role, permission)) {
+  if (!canUser(auth.user, permission)) {
     return {
       ok: false,
       response: NextResponse.json({ message: "You do not have permission to perform this action." }, { status: 403 }),

@@ -7,13 +7,16 @@ import { connectDB } from "../db";
 import User from "@/models/user";
 import Session, { type SessionDoc } from "@/models/session";
 import { SESSION_COOKIE, SESSION_TTL_DAYS } from "./constants";
+import { normalizeScopes, type Department, type Role } from "./rbac";
 
 export type SessionUser = {
   id: string;
   name: string;
   email: string;
-  role: "founder" | "team_member";
+  role: Role;
   title?: string;
+  department?: Department;
+  scopes: string[];
 };
 
 export type AuthContext = {
@@ -51,8 +54,10 @@ export const getAuthContext = cache(async (): Promise<AuthContext | null> => {
       _id: Types.ObjectId;
       name: string;
       email: string;
-      role: "founder" | "team_member";
+      role: Role;
       title?: string;
+      department?: Department;
+      scopes?: string[];
       status: string;
     }>();
     if (!user || user.status !== "active") return null;
@@ -64,6 +69,8 @@ export const getAuthContext = cache(async (): Promise<AuthContext | null> => {
         email: user.email,
         role: user.role,
         title: user.title,
+        department: user.department,
+        scopes: normalizeScopes(user.scopes),
       },
       session: { id: String(session._id), expiresAt: session.expiresAt },
     };

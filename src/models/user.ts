@@ -2,6 +2,7 @@ import mongoose, { model, Schema, type Model } from "mongoose";
 
 export type UserRole = "founder" | "team_member";
 export type UserStatus = "active" | "suspended";
+export type UserDepartment = "secretary" | "marketing" | "developer" | "tester";
 
 export interface UserDoc {
   name: string;
@@ -10,6 +11,8 @@ export interface UserDoc {
   role: UserRole;
   title?: string;
   status: UserStatus;
+  department?: UserDepartment;
+  scopes?: string[];
   lastLoginAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -32,6 +35,12 @@ const userSchema = new Schema<UserDoc, UserModel>(
     role: { type: String, enum: ["founder", "team_member"], default: "team_member" },
     title: { type: String, trim: true },
     status: { type: String, enum: ["active", "suspended"], default: "active" },
+    department: {
+      type: String,
+      enum: ["secretary", "marketing", "developer", "tester"],
+      default: undefined,
+    },
+    scopes: { type: [String], default: [] },
     lastLoginAt: Date,
   },
   { timestamps: true },

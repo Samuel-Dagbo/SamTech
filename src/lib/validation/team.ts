@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GRANTABLE_SCOPES, DEPARTMENTS } from "@/lib/auth/rbac";
 
 const passwordRules = z
   .string()
@@ -6,10 +7,16 @@ const passwordRules = z
   .max(128, "Password is too long")
   .refine((value) => value.trim().length >= 12, "Password cannot be only spaces");
 
+const departmentEnum = z.enum(DEPARTMENTS).optional();
+
 export const inviteSchema = z.object({
   name: z.string().trim().min(2, "Please enter the full name").max(120),
   email: z.email("Please enter a valid email address").max(200),
   title: z.string().trim().max(120).optional().or(z.literal("")),
+  department: z
+    .union([departmentEnum, z.literal("")])
+    .transform((value) => (value === "" ? undefined : value)),
+  scopes: z.array(z.enum(GRANTABLE_SCOPES)).optional(),
   role: z.enum(["founder", "team_member"]),
   welcomeMessage: z.string().trim().max(1000).optional().or(z.literal("")),
 });
@@ -38,8 +45,10 @@ export const changePasswordSchema = z.object({
 });
 
 export const teamActionSchema = z.object({
-  action: z.enum(["suspend", "reactivate", "change-role", "send-password-reset"]),
+  action: z.enum(["suspend", "reactivate", "change-role", "send-password-reset", "set-department", "set-scopes"]),
   role: z.enum(["founder", "team_member"]).optional(),
+  department: z.union([departmentEnum, z.literal("")]).optional(),
+  scopes: z.array(z.enum(GRANTABLE_SCOPES)).optional(),
 });
 
 export const invitationActionSchema = z.object({

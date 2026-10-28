@@ -7,6 +7,8 @@ export interface InvitationDoc {
   name: string;
   title?: string;
   role: "founder" | "team_member";
+  department?: "secretary" | "marketing" | "developer" | "tester";
+  scopes?: string[];
   status: InvitationStatus;
   tokenHash: string;
   invitedBy?: mongoose.Types.ObjectId;
@@ -27,6 +29,12 @@ const invitationSchema = new Schema<InvitationDoc, InvitationModel>(
     name: { type: String, required: true, trim: true },
     title: { type: String, trim: true },
     role: { type: String, enum: ["founder", "team_member"], required: true },
+    department: {
+      type: String,
+      enum: ["secretary", "marketing", "developer", "tester"],
+      default: undefined,
+    },
+    scopes: { type: [String], default: [] },
     status: { type: String, enum: ["pending", "accepted", "revoked"], default: "pending" },
     // HMAC-SHA256 of the raw token; the raw token never touches the database.
     tokenHash: { type: String, required: true, unique: true },

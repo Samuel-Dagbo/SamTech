@@ -1,7 +1,7 @@
 import { getIp, isSameOrigin, jsonError, jsonOk, logServerError } from "@/lib/http";
 import { requirePermission } from "@/lib/auth/guards";
 import { teamActionSchema } from "@/lib/validation/team";
-import { changeRole, reactivateMember, sendMemberPasswordReset, suspendMember } from "@/lib/services/team";
+import { changeRole, reactivateMember, sendMemberPasswordReset, setMemberDepartment, setMemberScopes, suspendMember } from "@/lib/services/team";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -53,6 +53,15 @@ export async function POST(request: Request, context: RouteContext) {
         break;
       case "send-password-reset":
         result = await sendMemberPasswordReset(id, ctx);
+        break;
+      case "set-department":
+        result = await setMemberDepartment(id, parsed.data.department, ctx);
+        break;
+      case "set-scopes":
+        if (!parsed.data.scopes) {
+          return jsonError(422, "A scopes list is required for set-scopes.");
+        }
+        result = await setMemberScopes(id, parsed.data.scopes, ctx);
         break;
     }
 
