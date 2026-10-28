@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 const MODULES = [
   { name: "Tasks", href: "/workspace/tasks", permission: "workspace.view", description: "Assign, track, and complete work." },
   { name: "Announcements", href: "/workspace/announcements", permission: "workspace.view", description: "Updates for everyone or one department." },
+  { name: "Content manager", href: "/workspace/cms", permission: "cms.manage", description: "Projects, services, testimonials, profile." },
   { name: "Team", href: "/workspace/team", permission: "team.manage", description: "Invite, suspend, and grant access." },
 ] as const;
 

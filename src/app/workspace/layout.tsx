@@ -56,6 +56,14 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
             >
               Announcements
             </Link>
+            {canUser(auth.user, "cms.manage") ? (
+              <Link
+                href="/workspace/cms"
+                className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+              >
+                Content
+              </Link>
+            ) : null}
             {canUser(auth.user, "team.manage") ? (
               <Link
                 href="/workspace/team"
