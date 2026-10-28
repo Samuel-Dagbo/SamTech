@@ -84,6 +84,14 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
             >
               Marketing
             </Link>
+            {canUser(auth.user, "audit.view") ? (
+              <Link
+                href="/workspace/audit"
+                className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+              >
+                Audit
+              </Link>
+            ) : null}
             {canUser(auth.user, "team.manage") ? (
               <Link
                 href="/workspace/team"
