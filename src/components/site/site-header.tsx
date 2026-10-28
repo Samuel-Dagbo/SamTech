@@ -63,13 +63,24 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <Link
-          href="/contact"
-          className={`${mobileOpen ? "col-span-2 flex" : "hidden"} items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-black xl:flex`}
-          onClick={() => setMobileOpen(false)}
+        <div
+          className={`${mobileOpen ? "col-span-2 flex" : "hidden"} items-center justify-center gap-2 xl:col-span-1 xl:flex`}
         >
-          Hire me
-        </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-full border border-forest/25 bg-white/70 px-5 py-3 text-sm font-semibold text-forest transition-all duration-300 hover:scale-105 hover:border-forest hover:bg-forest hover:text-white"
+            onClick={() => setMobileOpen(false)}
+          >
+            Staff login
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-black"
+            onClick={() => setMobileOpen(false)}
+          >
+            Hire me
+          </Link>
+        </div>
       </div>
     </header>
   );
