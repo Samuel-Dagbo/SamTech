@@ -64,6 +64,14 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
                 Content
               </Link>
             ) : null}
+            {canUser(auth.user, "messages.manage") ? (
+              <Link
+                href="/workspace/messages"
+                className="rounded-full px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+              >
+                Inbox
+              </Link>
+            ) : null}
             {canUser(auth.user, "team.manage") ? (
               <Link
                 href="/workspace/team"
