@@ -20,17 +20,23 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-4 rounded-[28px] border border-black/10 bg-white/70 px-4 py-4 shadow-panel backdrop-blur xl:grid-cols-[auto_1fr_auto]">
-        <Link href="/" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-forest text-base font-extrabold text-white">
+        <span className="flex items-center gap-3">
+          <Link
+            href="/login"
+            title="Staff login"
+            aria-label="Staff login"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-forest text-base font-extrabold text-white transition-all duration-300 hover:scale-110 hover:shadow-md"
+            onClick={() => setMobileOpen(false)}
+          >
             S
-          </span>
-          <span className="min-w-0">
+          </Link>
+          <Link href="/" className="min-w-0" onClick={() => setMobileOpen(false)}>
             <strong className="block text-base leading-none text-ink sm:text-lg">{site.name}</strong>
             <small className="block truncate pt-1 text-xs uppercase tracking-[0.18em] text-black/55 sm:text-[11px]">
               Full Stack Developer
             </small>
-          </span>
-        </Link>
+          </Link>
+        </span>
 
         <button
           type="button"
@@ -66,13 +72,6 @@ export function SiteHeader() {
         <div
           className={`${mobileOpen ? "col-span-2 flex" : "hidden"} items-center justify-center gap-2 xl:col-span-1 xl:flex`}
         >
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-full border border-forest/25 bg-white/70 px-5 py-3 text-sm font-semibold text-forest transition-all duration-300 hover:scale-105 hover:border-forest hover:bg-forest hover:text-white"
-            onClick={() => setMobileOpen(false)}
-          >
-            Staff login
-          </Link>
           <Link
             href="/contact"
             className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-black"
