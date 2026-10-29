@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+/brag-output
+
+# local capture tooling artifacts
+/capture
+/capture-2
+
 # next.js
 /.next/
 /out/

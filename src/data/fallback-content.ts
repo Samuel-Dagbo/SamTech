@@ -17,9 +17,9 @@ export const fallbackContent: SiteContent = {
     heroImage: "",
     contactImage:
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-    githubUrl: "https://github.com/example",
-    linkedinUrl: "https://linkedin.com/in/example",
-    xUrl: "https://x.com/example",
+    githubUrl: "https://github.com/Samuel-Dagbo",
+    linkedinUrl: "https://www.linkedin.com/in/samuel-dagbo-379961299/",
+    xUrl: undefined,
     resumeUrl: "",
     brands: ["SwiftCart", "Nova Labs", "LaunchStack", "PrimeCare Services"],
     aboutTitle: "Full stack development with a builder's mindset.",
