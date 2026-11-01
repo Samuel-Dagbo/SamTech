@@ -36,9 +36,47 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `${getPublicAppUrl()}/#person`,
+        name: "Samuel Dagbo",
+        alternateName: site.fullName,
+        url: getPublicAppUrl(),
+        email: `mailto:${site.emailFallback}`,
+        description: site.description,
+        jobTitle: site.role,
+        telephone: site.whatsappFallback,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Accra",
+          addressCountry: "GH",
+        },
+        knowsAbout: [...site.keywords],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${getPublicAppUrl()}/#website`,
+        url: getPublicAppUrl(),
+        name: site.fullName,
+        description: site.description,
+        publisher: { "@id": `${getPublicAppUrl()}/#person` },
+        inLanguage: "en",
+      },
+    ],
+  };
+
   return (
     <html lang="en">
       <body className={`${manrope.variable} ${spaceGrotesk.variable}`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
         <Toaster>{children}</Toaster>
       </body>
     </html>

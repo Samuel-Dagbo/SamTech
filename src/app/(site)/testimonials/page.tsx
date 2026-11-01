@@ -2,7 +2,8 @@ import { getPublicContent } from "@/lib/content";
 
 export const metadata = {
   title: "Testimonials",
-  description: "Feedback from people and teams I have built for.",
+  description:
+    "What clients say about working with SamTech Labs — real feedback from founders and businesses on websites, web apps and mobile products delivered in Accra, Ghana and beyond.",
 };
 
 export default async function TestimonialsPage() {

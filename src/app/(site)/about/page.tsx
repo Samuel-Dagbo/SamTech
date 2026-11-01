@@ -1,6 +1,12 @@
 ﻿import { RichText } from "@/components/site/rich-text";
 import { getPublicContent } from "@/lib/content";
 
+export const metadata = {
+  title: "About",
+  description:
+    "Meet Samuel Dagbo (SamTech Labs), a full stack MERN developer in Accra, Ghana. Learn about the journey, the tech stack, and how client products are built and delivered.",
+};
+
 const cardClass = "rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-panel backdrop-blur";
 
 const defaultGallery = [

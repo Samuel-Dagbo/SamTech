@@ -3,7 +3,8 @@ import { getPublicContent } from "@/lib/content";
 
 export const metadata = {
   title: "Work",
-  description: "Case-study style portfolio pieces with clear product value.",
+  description:
+    "Real client projects and case studies: delivery apps, school management portals, e-commerce, dashboards and booking platforms — built with React, Node.js, Express and MongoDB.",
 };
 
 export default async function WorkPage() {
