@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { recordAudit } from "@/lib/audit";
 import type { SessionUser } from "@/lib/auth/session";
-import { slugify } from "@/lib/validation/cms";
+import { slugify, parseGallery, parseFaq, parseTimeline } from "@/lib/validation/cms";
 import Profile from "@/models/profile";
 import Project from "@/models/project";
 import Service from "@/models/service";
@@ -218,6 +218,7 @@ export async function saveProfile(
     tagline?: string;
     intro?: string;
     location?: string;
+    yearsExperience?: string;
     availability?: string;
     email?: string;
     whatsapp?: string;
@@ -229,7 +230,24 @@ export async function saveProfile(
     contactImage?: string;
     aboutTitle?: string;
     aboutIntro?: string;
+    aboutImage?: string;
+    aboutGallery?: string;
+    aboutName?: string;
+    aboutEducation?: string;
+    aboutJourneyTitle?: string;
+    aboutJourneyBody?: string;
+    aboutInspirationTitle?: string;
+    aboutInspirationBody?: string;
+    aboutWhoTitle?: string;
+    aboutWhoBody?: string;
+    aboutStackTitle?: string;
+    aboutStackBody?: string;
+    aboutApproachTitle?: string;
+    aboutApproachBody?: string;
     techStack?: string;
+    brands?: string;
+    experienceTimelineRaw?: string;
+    faqItemsRaw?: string;
   },
   ctx: CmsContext,
 ): Promise<CmsResult> {
@@ -241,6 +259,7 @@ export async function saveProfile(
     tagline: input.tagline || undefined,
     intro: input.intro || undefined,
     location: input.location || undefined,
+    yearsExperience: input.yearsExperience || undefined,
     availability: input.availability || undefined,
     email: input.email || undefined,
     whatsapp: input.whatsapp || undefined,
@@ -252,7 +271,27 @@ export async function saveProfile(
     contactImage: input.contactImage || undefined,
     aboutTitle: input.aboutTitle || undefined,
     aboutIntro: input.aboutIntro || undefined,
+    aboutImage: input.aboutImage || undefined,
+    aboutGallery: input.aboutGallery === undefined ? undefined : parseGallery(input.aboutGallery),
+    aboutName: input.aboutName || undefined,
+    aboutEducation: input.aboutEducation || undefined,
+    aboutJourneyTitle: input.aboutJourneyTitle || undefined,
+    aboutJourneyBody: input.aboutJourneyBody || undefined,
+    aboutInspirationTitle: input.aboutInspirationTitle || undefined,
+    aboutInspirationBody: input.aboutInspirationBody || undefined,
+    aboutWhoTitle: input.aboutWhoTitle || undefined,
+    aboutWhoBody: input.aboutWhoBody || undefined,
+    aboutStackTitle: input.aboutStackTitle || undefined,
+    aboutStackBody: input.aboutStackBody || undefined,
+    aboutApproachTitle: input.aboutApproachTitle || undefined,
+    aboutApproachBody: input.aboutApproachBody || undefined,
     techStack: toLines(input.techStack),
+    brands: input.brands === undefined ? undefined : toLines(input.brands),
+    experienceTimeline:
+      input.experienceTimelineRaw === undefined
+        ? undefined
+        : parseTimeline(input.experienceTimelineRaw),
+    faqItems: input.faqItemsRaw === undefined ? undefined : parseFaq(input.faqItemsRaw),
   };
 
   if (existing) {

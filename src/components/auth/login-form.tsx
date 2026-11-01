@@ -76,7 +76,7 @@ export function LoginForm() {
 /** Only allow internal, non-protocol-relative redirect targets. */
 function sanitizeNext(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) {
-    return "/workspace";
+    return "/workspace/cms";
   }
   return raw;
 }

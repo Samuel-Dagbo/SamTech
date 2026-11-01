@@ -1,19 +1,24 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connectDB } from "@/lib/db";
 import { getAuthContext } from "@/lib/auth/session";
 import { ROLE_LABELS, canUser } from "@/lib/auth/rbac";
 import { listTasks } from "@/lib/services/tasks";
 import { listAnnouncements } from "@/lib/services/announcements";
 import { DEPARTMENT_LABELS, type Department } from "@/lib/auth/rbac";
+import Project from "@/models/project";
+import Service from "@/models/service";
+import Testimonial from "@/models/testimonial";
+import ContactMessage from "@/models/contact-message";
 
 export const dynamic = "force-dynamic";
 
 const MODULES = [
+  { name: "Content manager", href: "/workspace/cms", permission: "cms.manage", description: "Projects, services, testimonials, profile." },
   { name: "Tasks", href: "/workspace/tasks", permission: "workspace.view", description: "Assign, track, and complete work." },
   { name: "Announcements", href: "/workspace/announcements", permission: "workspace.view", description: "Updates for everyone or one department." },
   { name: "Resources", href: "/workspace/resources", permission: "workspace.view", description: "Briefs, assets, templates, guides." },
   { name: "Marketing", href: "/workspace/marketing", permission: "workspace.view", description: "Plan and track channel posts." },
-  { name: "Content manager", href: "/workspace/cms", permission: "cms.manage", description: "Projects, services, testimonials, profile." },
   { name: "Team", href: "/workspace/team", permission: "team.manage", description: "Invite, suspend, and grant access." },
 ] as const;
 
@@ -23,9 +28,26 @@ export default async function WorkspaceHomePage() {
     redirect("/login?next=/workspace");
   }
 
-  const [tasks, announcements] = await Promise.all([
+  const manageCms = canUser(auth.user, "cms.manage");
+  const [tasks, announcements, siteStats] = await Promise.all([
     listTasks({ viewer: auth.user }),
     listAnnouncements({ role: auth.user.role, department: auth.user.department, manage: canUser(auth.user, "announcements.publish") }),
+    manageCms
+      ? (async () => {
+          await connectDB();
+          const [projects, publishedProjects, services, publishedServices, testimonials, publishedTestimonials, messages, newMessages] = await Promise.all([
+            Project.countDocuments(),
+            Project.countDocuments({ published: { $ne: false } }),
+            Service.countDocuments(),
+            Service.countDocuments({ published: { $ne: false } }),
+            Testimonial.countDocuments(),
+            Testimonial.countDocuments({ published: { $ne: false } }),
+            ContactMessage.countDocuments(),
+            ContactMessage.countDocuments({ status: "new" }),
+          ]);
+          return { projects, publishedProjects, services, publishedServices, testimonials, publishedTestimonials, messages, newMessages };
+        })()
+      : null,
   ]);
 
   const firstName = auth.user.name.split(" ")[0] || auth.user.name;
@@ -62,6 +84,40 @@ export default async function WorkspaceHomePage() {
           </span>
         </div>
       </section>
+
+      {siteStats ? (
+        <section>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl text-ink">Site content</h2>
+            <Link
+              href="/workspace/cms"
+              className="rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white transition hover:bg-black"
+            >
+              Manage site content →
+            </Link>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: "Projects", total: siteStats.projects, active: siteStats.publishedProjects, href: "/workspace/cms" },
+              { label: "Services", total: siteStats.services, active: siteStats.publishedServices, href: "/workspace/cms" },
+              { label: "Testimonials", total: siteStats.testimonials, active: siteStats.publishedTestimonials, href: "/workspace/cms" },
+              { label: "Messages", total: siteStats.messages, active: siteStats.newMessages, href: "/workspace/messages", activeLabel: "new" },
+            ].map((stat) => (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="rounded-[22px] border border-black/10 bg-white/75 p-5 shadow-panel backdrop-blur transition hover:border-clay/40"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay">{stat.label}</p>
+                <p className="mt-2 text-3xl font-semibold text-ink">{stat.total}</p>
+                <p className="mt-1 text-xs text-black/50">
+                  {stat.activeLabel ?? "published"}: {stat.active}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {latestAnnouncement ? (
         <section className="rounded-[28px] border border-clay/30 bg-clay/5 p-6 shadow-panel">

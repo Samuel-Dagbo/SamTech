@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import { getAuthContext } from "@/lib/auth/session";
 import { canUser } from "@/lib/auth/rbac";
+import { serializeGallery, serializeFaq, serializeTimeline } from "@/lib/validation/cms";
 import Profile from "@/models/profile";
 import Project from "@/models/project";
 import Service from "@/models/service";
@@ -33,6 +34,7 @@ export default async function CmsPage() {
       tagline?: string;
       intro?: string;
       location?: string;
+      yearsExperience?: string;
       availability?: string;
       email?: string;
       whatsapp?: string;
@@ -44,7 +46,24 @@ export default async function CmsPage() {
       contactImage?: string;
       aboutTitle?: string;
       aboutIntro?: string;
+      aboutImage?: string;
+      aboutGallery?: string[];
+      aboutName?: string;
+      aboutEducation?: string;
+      aboutJourneyTitle?: string;
+      aboutJourneyBody?: string;
+      aboutInspirationTitle?: string;
+      aboutInspirationBody?: string;
+      aboutWhoTitle?: string;
+      aboutWhoBody?: string;
+      aboutStackTitle?: string;
+      aboutStackBody?: string;
+      aboutApproachTitle?: string;
+      aboutApproachBody?: string;
       techStack?: string[];
+      brands?: string[];
+      experienceTimeline?: { period?: string; title?: string; subtitle?: string; description?: string }[];
+      faqItems?: { question?: string; answer?: string }[];
     } | null>(),
     Project.find().sort({ order: 1, createdAt: -1 }).lean<{
       _id: { toString(): string };
@@ -145,6 +164,7 @@ export default async function CmsPage() {
     tagline: profile?.tagline ?? "",
     intro: profile?.intro ?? "",
     location: profile?.location ?? "",
+    yearsExperience: profile?.yearsExperience ?? "",
     availability: profile?.availability ?? "",
     email: profile?.email ?? "",
     whatsapp: profile?.whatsapp ?? "",
@@ -156,7 +176,24 @@ export default async function CmsPage() {
     contactImage: profile?.contactImage ?? "",
     aboutTitle: profile?.aboutTitle ?? "",
     aboutIntro: profile?.aboutIntro ?? "",
+    aboutImage: profile?.aboutImage ?? "",
+    aboutGallery: serializeGallery(profile?.aboutGallery),
+    aboutName: profile?.aboutName ?? "",
+    aboutEducation: profile?.aboutEducation ?? "",
+    aboutJourneyTitle: profile?.aboutJourneyTitle ?? "",
+    aboutJourneyBody: profile?.aboutJourneyBody ?? "",
+    aboutInspirationTitle: profile?.aboutInspirationTitle ?? "",
+    aboutInspirationBody: profile?.aboutInspirationBody ?? "",
+    aboutWhoTitle: profile?.aboutWhoTitle ?? "",
+    aboutWhoBody: profile?.aboutWhoBody ?? "",
+    aboutStackTitle: profile?.aboutStackTitle ?? "",
+    aboutStackBody: profile?.aboutStackBody ?? "",
+    aboutApproachTitle: profile?.aboutApproachTitle ?? "",
+    aboutApproachBody: profile?.aboutApproachBody ?? "",
     techStack: (profile?.techStack ?? []).join(", "),
+    brands: (profile?.brands ?? []).join(", "),
+    experienceTimelineRaw: serializeTimeline(profile?.experienceTimeline),
+    faqItemsRaw: serializeFaq(profile?.faqItems),
   };
 
   return (

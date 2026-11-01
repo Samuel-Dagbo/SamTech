@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClasses } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
+import { compressImageToDataUrl } from "@/lib/image-client";
 
 export type CmsItem = {
   id: string;
@@ -15,6 +16,8 @@ export type CmsItem = {
 };
 
 export type ProfileForm = Record<string, string>;
+
+const MEDIA_FIELD_NAMES = new Set(["image", "heroImage", "contactImage", "aboutImage"]);
 
 const PROJECT_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
   { name: "title", label: "Title", placeholder: "Church ERP System" },
@@ -46,12 +49,13 @@ const TESTIMONIAL_FIELDS: { name: string; label: string; type?: "textarea"; plac
   { name: "image", label: "Image URL (https)" },
 ];
 
-const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
+const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string; media?: boolean }[] = [
   { name: "name", label: "Full name" },
   { name: "role", label: "Role title", placeholder: "Full-Stack Software Developer" },
   { name: "tagline", label: "Tagline" },
   { name: "intro", label: "Intro", type: "textarea" },
   { name: "location", label: "Location" },
+  { name: "yearsExperience", label: "Years of experience", placeholder: "4+" },
   { name: "availability", label: "Availability", placeholder: "Open to new projects" },
   { name: "email", label: "Contact email" },
   { name: "whatsapp", label: "WhatsApp number" },
@@ -59,11 +63,26 @@ const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placehol
   { name: "githubUrl", label: "GitHub URL (https)" },
   { name: "linkedinUrl", label: "LinkedIn URL (https)" },
   { name: "xUrl", label: "X URL (https)" },
-  { name: "heroImage", label: "Hero image URL (https)" },
-  { name: "contactImage", label: "Contact image URL (https)" },
+  { name: "heroImage", label: "Hero image", media: true },
+  { name: "contactImage", label: "Contact page image", media: true },
   { name: "aboutTitle", label: "About section title" },
   { name: "aboutIntro", label: "About intro", type: "textarea" },
+  { name: "aboutImage", label: "About page image", media: true },
+  { name: "aboutName", label: "About card name" },
+  { name: "aboutEducation", label: "Education line", placeholder: "University education, study area" },
+  { name: "aboutGallery", label: "About gallery — one image URL per line" },
+  { name: "aboutJourneyTitle", label: "Journey: heading" },
+  { name: "aboutJourneyBody", label: "Journey: story", type: "textarea" },
+  { name: "aboutInspirationTitle", label: "Inspiration: heading" },
+  { name: "aboutInspirationBody", label: "Inspiration: story", type: "textarea" },
+  { name: "aboutWhoTitle", label: "Who I am: heading" },
+  { name: "aboutWhoBody", label: "Who I am: story", type: "textarea" },
+  { name: "aboutStackTitle", label: "Tech stack: heading" },
+  { name: "aboutStackBody", label: "Tech stack: story", type: "textarea" },
+  { name: "aboutApproachTitle", label: "How I work: heading" },
+  { name: "aboutApproachBody", label: "How I work: story", type: "textarea" },
   { name: "techStack", label: "Tech stack (comma separated)" },
+  { name: "brands", label: "Brands / featured clients (comma separated)" },
 ];
 
 async function postApi(url: string, body: unknown): Promise<string> {
@@ -77,6 +96,76 @@ async function postApi(url: string, body: unknown): Promise<string> {
     throw new Error(payload?.message ?? "Something went wrong. Please try again.");
   }
   return payload?.message ?? "Done.";
+}
+
+/** URL input plus a legacy-style upload panel: pick a file, it is compressed and stored inline. */
+function MediaInput({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      onChange(dataUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed. Try another image.");
+    } finally {
+      setBusy(false);
+      event.target.value = "";
+    }
+  }
+
+  const isUpload = value.startsWith("data:");
+  return (
+    <div className="grid gap-1.5">
+      <Label htmlFor={id}>Image (upload or paste an https URL)</Label>
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <Input
+            id={id}
+            placeholder="https://… or upload below"
+            value={isUpload ? "Uploaded image (stored with the content)" : value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+        <label className={`${buttonClasses("outline", "sm")} cursor-pointer`}>
+          {busy ? "Processing…" : "Upload"}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleFile}
+            disabled={busy}
+          />
+        </label>
+      </div>
+      {value ? (
+        <img
+          src={value}
+          alt="Preview"
+          className="h-20 w-32 rounded-xl border border-black/10 object-cover"
+        />
+      ) : null}
+      {error ? <p className="text-xs text-clay-strong">{error}</p> : null}
+      {isUpload ? (
+        <p className="text-xs text-black/50">
+          Uploaded images are auto-compressed before saving. Choose Upload again to replace.
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 type CollectionKey = "projects" | "services" | "testimonials";
@@ -122,27 +211,37 @@ function ItemForm({
 
   return (
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={save} noValidate>
-      {fields.map((field) => (
-        <div key={field.name} className="grid gap-1.5 sm:col-span-2 sm:first:col-span-1">
-          <Label htmlFor={`${collection}-${item?.id ?? "new"}-${field.name}`}>{field.label}</Label>
-          {field.type === "textarea" ? (
-            <Textarea
+      {fields.map((field) =>
+        MEDIA_FIELD_NAMES.has(field.name) ? (
+          <div key={field.name} className="sm:col-span-2">
+            <MediaInput
               id={`${collection}-${item?.id ?? "new"}-${field.name}`}
-              rows={field.name === "summary" ? 2 : 4}
-              placeholder={field.placeholder}
               value={values[field.name] ?? ""}
-              onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+              onChange={(value) => setValues((current) => ({ ...current, [field.name]: value }))}
             />
-          ) : (
-            <Input
-              id={`${collection}-${item?.id ?? "new"}-${field.name}`}
-              placeholder={field.placeholder}
-              value={values[field.name] ?? ""}
-              onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
-            />
-          )}
-        </div>
-      ))}
+          </div>
+        ) : (
+          <div key={field.name} className="grid gap-1.5 sm:col-span-2 sm:first:col-span-1">
+            <Label htmlFor={`${collection}-${item?.id ?? "new"}-${field.name}`}>{field.label}</Label>
+            {field.type === "textarea" ? (
+              <Textarea
+                id={`${collection}-${item?.id ?? "new"}-${field.name}`}
+                rows={field.name === "summary" ? 2 : 4}
+                placeholder={field.placeholder}
+                value={values[field.name] ?? ""}
+                onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+              />
+            ) : (
+              <Input
+                id={`${collection}-${item?.id ?? "new"}-${field.name}`}
+                placeholder={field.placeholder}
+                value={values[field.name] ?? ""}
+                onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+              />
+            )}
+          </div>
+        ),
+      )}
       <div className="grid gap-1.5">
         <Label htmlFor={`${collection}-${item?.id ?? "new"}-order`}>Sort order</Label>
         <Input id={`${collection}-${item?.id ?? "new"}-order`} type="number" min={0} max={999} value={order} onChange={(e) => setOrder(e.target.value)} />
@@ -292,29 +391,63 @@ function ProfileSection({
 
   return (
     <section className="rounded-[28px] border border-black/10 bg-white/70 p-6 shadow-panel">
-      <h2 className="text-lg text-ink">Profile &amp; contact details</h2>
+      <h2 className="text-lg text-ink">Profile, homepage &amp; About page</h2>
+      <p className="mt-1 text-sm text-black/55">
+        Experience timeline and FAQ use blocks separated by a blank line. Timeline block: first line
+        <span className="rounded bg-sand px-1 font-mono text-xs">Period | Title | Subtitle</span>, description on the next lines.
+      </p>
       <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={save} noValidate>
-        {PROFILE_FIELDS.map((field) => (
-          <div key={field.name} className={`grid gap-1.5 ${field.type === "textarea" ? "sm:col-span-2" : ""}`}>
-            <Label htmlFor={`profile-${field.name}`}>{field.label}</Label>
-            {field.type === "textarea" ? (
-              <Textarea
+        {PROFILE_FIELDS.map((field) =>
+          field.media ? (
+            <div key={field.name} className="sm:col-span-2">
+              <MediaInput
                 id={`profile-${field.name}`}
-                rows={3}
-                placeholder={field.placeholder}
                 value={values[field.name] ?? ""}
-                onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+                onChange={(value) => setValues((current) => ({ ...current, [field.name]: value }))}
               />
-            ) : (
-              <Input
-                id={`profile-${field.name}`}
-                placeholder={field.placeholder}
-                value={values[field.name] ?? ""}
-                onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
-              />
-            )}
-          </div>
-        ))}
+            </div>
+          ) : (
+            <div key={field.name} className={`grid gap-1.5 ${field.type === "textarea" ? "sm:col-span-2" : ""}`}>
+              <Label htmlFor={`profile-${field.name}`}>{field.label}</Label>
+              {field.type === "textarea" ? (
+                <Textarea
+                  id={`profile-${field.name}`}
+                  rows={field.name.startsWith("about") && field.name.endsWith("Body") ? 4 : 3}
+                  placeholder={field.placeholder}
+                  value={values[field.name] ?? ""}
+                  onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+                />
+              ) : (
+                <Input
+                  id={`profile-${field.name}`}
+                  placeholder={field.placeholder}
+                  value={values[field.name] ?? ""}
+                  onChange={(e) => setValues((current) => ({ ...current, [field.name]: e.target.value }))}
+                />
+              )}
+            </div>
+          ),
+        )}
+        <div className="grid gap-1.5 sm:col-span-2">
+          <Label htmlFor="profile-experienceTimelineRaw">Experience timeline</Label>
+          <Textarea
+            id="profile-experienceTimelineRaw"
+            rows={7}
+            placeholder={"2022 – Present | Freelance Full-Stack Developer | SamTech Labs\nBuilding websites and web products for small businesses.\n\n2021 – 2022 | Junior Developer | Company"}
+            value={values.experienceTimelineRaw ?? ""}
+            onChange={(e) => setValues((current) => ({ ...current, experienceTimelineRaw: e.target.value }))}
+          />
+        </div>
+        <div className="grid gap-1.5 sm:col-span-2">
+          <Label htmlFor="profile-faqItemsRaw">FAQ items</Label>
+          <Textarea
+            id="profile-faqItemsRaw"
+            rows={6}
+            placeholder={"How do we start working together?\nDescribe your project on the contact page and I reply within 24 hours.\n\nWhat is your turnaround time?\nTwo to six weeks depending on scope."}
+            value={values.faqItemsRaw ?? ""}
+            onChange={(e) => setValues((current) => ({ ...current, faqItemsRaw: e.target.value }))}
+          />
+        </div>
         <div className="sm:col-span-2">
           <Button type="submit" disabled={busy}>
             {busy ? "Saving…" : "Save profile"}
