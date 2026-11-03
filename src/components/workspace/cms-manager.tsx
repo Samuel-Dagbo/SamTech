@@ -19,7 +19,7 @@ export type ProfileForm = Record<string, string>;
 
 const MEDIA_FIELD_NAMES = new Set(["image", "heroImage", "contactImage", "aboutImage"]);
 
-const PROJECT_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
+export const PROJECT_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
   { name: "title", label: "Title", placeholder: "Church ERP System" },
   { name: "slug", label: "Slug (auto if blank)" },
   { name: "category", label: "Category", placeholder: "Web platform" },
@@ -33,7 +33,7 @@ const PROJECT_FIELDS: { name: string; label: string; type?: "textarea"; placehol
   { name: "repoUrl", label: "Repository URL (https)" },
 ];
 
-const SERVICE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
+export const SERVICE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
   { name: "title", label: "Title", placeholder: "Web development" },
   { name: "slug", label: "Slug (auto if blank)" },
   { name: "copy", label: "Copy", type: "textarea" },
@@ -42,14 +42,14 @@ const SERVICE_FIELDS: { name: string; label: string; type?: "textarea"; placehol
   { name: "image", label: "Image URL (https)" },
 ];
 
-const TESTIMONIAL_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
+export const TESTIMONIAL_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string }[] = [
   { name: "name", label: "Client name" },
   { name: "company", label: "Company" },
   { name: "quote", label: "Quote", type: "textarea" },
   { name: "image", label: "Image URL (https)" },
 ];
 
-const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string; media?: boolean }[] = [
+export const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placeholder?: string; media?: boolean }[] = [
   { name: "name", label: "Full name" },
   { name: "role", label: "Role title", placeholder: "Full-Stack Software Developer" },
   { name: "tagline", label: "Tagline" },
@@ -85,7 +85,7 @@ const PROFILE_FIELDS: { name: string; label: string; type?: "textarea"; placehol
   { name: "brands", label: "Brands / featured clients (comma separated)" },
 ];
 
-async function postApi(url: string, body: unknown): Promise<string> {
+export async function postApi(url: string, body: unknown): Promise<string> {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -99,7 +99,7 @@ async function postApi(url: string, body: unknown): Promise<string> {
 }
 
 /** URL input plus a legacy-style upload panel: pick a file, it is compressed and stored inline. */
-function MediaInput({
+export function MediaInput({
   id,
   value,
   onChange,
@@ -270,7 +270,7 @@ function ItemForm({
   );
 }
 
-function CollectionSection({
+export function CollectionSection({
   collection,
   label,
   items,

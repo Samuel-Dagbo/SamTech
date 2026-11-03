@@ -10,6 +10,10 @@ import Project from "@/models/project";
 import Service from "@/models/service";
 import Testimonial from "@/models/testimonial";
 import ContactMessage from "@/models/contact-message";
+import Profile from "@/models/profile";
+import { FounderDashboard } from "@/components/workspace/founder-dashboard";
+import type { CmsItem, ProfileForm } from "@/components/workspace/cms-manager";
+import { serializeFaq, serializeTimeline } from "@/lib/validation/cms";
 
 export const dynamic = "force-dynamic";
 
@@ -29,27 +33,190 @@ export default async function WorkspaceHomePage() {
   }
 
   const manageCms = canUser(auth.user, "cms.manage");
-  const [tasks, announcements, siteStats] = await Promise.all([
+
+  if (manageCms) {
+    await connectDB();
+    const [statsData, profile, projects, services, testimonials] = await Promise.all([
+      Promise.all([
+        Project.countDocuments(),
+        Project.countDocuments({ published: { $ne: false } }),
+        Service.countDocuments(),
+        Service.countDocuments({ published: { $ne: false } }),
+        Testimonial.countDocuments(),
+        Testimonial.countDocuments({ published: { $ne: false } }),
+        ContactMessage.countDocuments(),
+        ContactMessage.countDocuments({ status: "new" }),
+      ]).then(([projects, publishedProjects, services, publishedServices, testimonials, publishedTestimonials, messages, newMessages]) => ({
+        projects,
+        publishedProjects,
+        services,
+        publishedServices,
+        testimonials,
+        publishedTestimonials,
+        messages,
+        newMessages,
+      })),
+      (async () => {
+        const doc = await Profile.findOne().sort({ createdAt: -1 }).lean<{
+          name?: string;
+          role?: string;
+          tagline?: string;
+          intro?: string;
+          location?: string;
+          yearsExperience?: string;
+          availability?: string;
+          email?: string;
+          whatsapp?: string;
+          resumeUrl?: string;
+          githubUrl?: string;
+          linkedinUrl?: string;
+          xUrl?: string;
+          heroImage?: string;
+          contactImage?: string;
+          aboutTitle?: string;
+          aboutIntro?: string;
+          aboutImage?: string;
+          aboutGallery?: string[];
+          aboutName?: string;
+          aboutEducation?: string;
+          aboutJourneyTitle?: string;
+          aboutJourneyBody?: string;
+          aboutInspirationTitle?: string;
+          aboutInspirationBody?: string;
+          aboutWhoTitle?: string;
+          aboutWhoBody?: string;
+          aboutStackTitle?: string;
+          aboutStackBody?: string;
+          aboutApproachTitle?: string;
+          aboutApproachBody?: string;
+          techStack?: string[];
+          brands?: string[];
+          experienceTimeline?: { period?: string; title?: string; subtitle?: string; description?: string }[];
+          faqItems?: { question?: string; answer?: string }[];
+        } | null>();
+        const profileForm: ProfileForm = {
+          name: doc?.name ?? "",
+          role: doc?.role ?? "",
+          tagline: doc?.tagline ?? "",
+          intro: doc?.intro ?? "",
+          location: doc?.location ?? "",
+          yearsExperience: doc?.yearsExperience ?? "",
+          availability: doc?.availability ?? "",
+          email: doc?.email ?? "",
+          whatsapp: doc?.whatsapp ?? "",
+          resumeUrl: doc?.resumeUrl ?? "",
+          githubUrl: doc?.githubUrl ?? "",
+          linkedinUrl: doc?.linkedinUrl ?? "",
+          xUrl: doc?.xUrl ?? "",
+          heroImage: doc?.heroImage ?? "",
+          contactImage: doc?.contactImage ?? "",
+          aboutTitle: doc?.aboutTitle ?? "",
+          aboutIntro: doc?.aboutIntro ?? "",
+          aboutImage: doc?.aboutImage ?? "",
+          aboutGallery: (doc?.aboutGallery ?? []).join("\n"),
+          aboutName: doc?.aboutName ?? "",
+          aboutEducation: doc?.aboutEducation ?? "",
+          aboutJourneyTitle: doc?.aboutJourneyTitle ?? "",
+          aboutJourneyBody: doc?.aboutJourneyBody ?? "",
+          aboutInspirationTitle: doc?.aboutInspirationTitle ?? "",
+          aboutInspirationBody: doc?.aboutInspirationBody ?? "",
+          aboutWhoTitle: doc?.aboutWhoTitle ?? "",
+          aboutWhoBody: doc?.aboutWhoBody ?? "",
+          aboutStackTitle: doc?.aboutStackTitle ?? "",
+          aboutStackBody: doc?.aboutStackBody ?? "",
+          aboutApproachTitle: doc?.aboutApproachTitle ?? "",
+          aboutApproachBody: doc?.aboutApproachBody ?? "",
+          techStack: (doc?.techStack ?? []).join(", "),
+          brands: (doc?.brands ?? []).join(", "),
+          experienceTimelineRaw: serializeTimeline(doc?.experienceTimeline),
+          faqItemsRaw: serializeFaq(doc?.faqItems),
+        };
+        return profileForm;
+      })(),
+      (async () => {
+        const projectDocs = await Project.find().sort({ order: 1, createdAt: -1 }).lean();
+        const projects: CmsItem[] = projectDocs.map((doc) => ({
+          id: String(doc._id),
+          title: doc.title ?? "",
+          subtitle: doc.category ?? "",
+          published: doc.published !== false,
+          featured: Boolean(doc.featured),
+          order: doc.order ?? 0,
+          fields: {
+            title: doc.title ?? "",
+            slug: doc.slug ?? "",
+            category: doc.category ?? "",
+            summary: doc.summary ?? "",
+            problem: doc.problem ?? "",
+            solution: doc.solution ?? "",
+            result: doc.result ?? "",
+            stack: (doc.stack ?? []).join(", "),
+            image: doc.image ?? "",
+            liveUrl: doc.liveUrl ?? "",
+            repoUrl: doc.repoUrl ?? "",
+          },
+        }));
+        return projects;
+      })(),
+      (async () => {
+        const serviceDocs = await Service.find().sort({ order: 1, createdAt: -1 }).lean();
+        const services: CmsItem[] = serviceDocs.map((doc) => ({
+          id: String(doc._id),
+          title: doc.title ?? "",
+          subtitle: "",
+          published: doc.published !== false,
+          featured: false,
+          order: doc.order ?? 0,
+          fields: {
+            title: doc.title ?? "",
+            slug: doc.slug ?? "",
+            copy: doc.copy ?? "",
+            benefits: (doc.benefits ?? []).join("\n"),
+            technologies: (doc.technologies ?? []).join("\n"),
+            image: doc.image ?? "",
+          },
+        }));
+        return services;
+      })(),
+      (async () => {
+        const testimonialDocs = await Testimonial.find().sort({ order: 1, createdAt: -1 }).lean();
+        const testimonials: CmsItem[] = testimonialDocs.map((doc) => ({
+          id: String(doc._id),
+          title: doc.name ?? "",
+          subtitle: doc.company ?? "",
+          published: doc.published !== false,
+          featured: false,
+          order: doc.order ?? 0,
+          fields: {
+            name: doc.name ?? "",
+            company: doc.company ?? "",
+            quote: doc.quote ?? "",
+            image: doc.image ?? "",
+          },
+        }));
+        return testimonials;
+      })(),
+    ]);
+
+    return (
+      <FounderDashboard
+        email={auth.user.email}
+        title={auth.user.title}
+        department={auth.user.department}
+        stats={statsData}
+        profile={profile}
+        projects={projects}
+        services={services}
+        testimonials={testimonials}
+      />
+    );
+  }
+
+  // Non-content managers keep the team operations module grid.
+  const [tasks, announcements] = await Promise.all([
     listTasks({ viewer: auth.user }),
     listAnnouncements({ role: auth.user.role, department: auth.user.department, manage: canUser(auth.user, "announcements.publish") }),
-    manageCms
-      ? (async () => {
-          await connectDB();
-          const [projects, publishedProjects, services, publishedServices, testimonials, publishedTestimonials, messages, newMessages] = await Promise.all([
-            Project.countDocuments(),
-            Project.countDocuments({ published: { $ne: false } }),
-            Service.countDocuments(),
-            Service.countDocuments({ published: { $ne: false } }),
-            Testimonial.countDocuments(),
-            Testimonial.countDocuments({ published: { $ne: false } }),
-            ContactMessage.countDocuments(),
-            ContactMessage.countDocuments({ status: "new" }),
-          ]);
-          return { projects, publishedProjects, services, publishedServices, testimonials, publishedTestimonials, messages, newMessages };
-        })()
-      : null,
   ]);
-
   const firstName = auth.user.name.split(" ")[0] || auth.user.name;
   const openTasks = tasks.filter((task) => task.status !== "done");
   const myOpen = openTasks.filter((task) => task.assigneeId === auth.user.id);
@@ -84,40 +251,6 @@ export default async function WorkspaceHomePage() {
           </span>
         </div>
       </section>
-
-      {siteStats ? (
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl text-ink">Site content</h2>
-            <Link
-              href="/workspace/cms"
-              className="rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white transition hover:bg-black"
-            >
-              Manage site content →
-            </Link>
-          </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: "Projects", total: siteStats.projects, active: siteStats.publishedProjects, href: "/workspace/cms" },
-              { label: "Services", total: siteStats.services, active: siteStats.publishedServices, href: "/workspace/cms" },
-              { label: "Testimonials", total: siteStats.testimonials, active: siteStats.publishedTestimonials, href: "/workspace/cms" },
-              { label: "Messages", total: siteStats.messages, active: siteStats.newMessages, href: "/workspace/messages", activeLabel: "new" },
-            ].map((stat) => (
-              <Link
-                key={stat.label}
-                href={stat.href}
-                className="rounded-[22px] border border-black/10 bg-white/75 p-5 shadow-panel backdrop-blur transition hover:border-clay/40"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay">{stat.label}</p>
-                <p className="mt-2 text-3xl font-semibold text-ink">{stat.total}</p>
-                <p className="mt-1 text-xs text-black/50">
-                  {stat.activeLabel ?? "published"}: {stat.active}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       {latestAnnouncement ? (
         <section className="rounded-[28px] border border-clay/30 bg-clay/5 p-6 shadow-panel">
